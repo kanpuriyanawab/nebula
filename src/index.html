@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Agentic Browser++</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #f0f0f0;
+        }
+
+        .browser-header {
+            display: flex;
+            flex-direction: column;
+            background-color: #e0e0e0;
+            border-bottom: 1px solid #ccc;
+            padding: 5px;
+        }
+
+        .tab-bar {
+            display: flex;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #bbb;
+        }
+
+        .tab {
+            padding: 8px 15px;
+            margin-right: 5px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 0.9em;
+            color: #555;
+            flex-shrink: 0; /* Prevent tabs from shrinking */
+            position: relative;
+        }
+
+        .tab.active {
+            background-color: #fff;
+            border-color: #aaa;
+            color: #333;
+            z-index: 1; /* Bring active tab to front */
+        }
+        .tab-close {
+            margin-left: 10px;
+            font-weight: bold;
+            color: #888;
+            cursor: pointer;
+        }
+        .tab-close:hover {
+            color: #333;
+        }
+        .new-tab-button {
+            padding: 8px 15px;
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #555;
+            flex-shrink: 0;
+            margin-left: 5px;
+        }
+        .new-tab-button:hover {
+            background-color: #eee;
+        }
+
+        .address-bar-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 0;
+        }
+
+        .nav-button {
+            padding: 5px 10px;
+            font-size: 1.2em;
+            background-color: #e9e9e9;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .nav-button:hover {
+            background-color: #ddd;
+        }
+
+        #addressBar {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+
+        #goBtn, #agentPromptBtn {
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        #goBtn:hover, #agentPromptBtn:hover {
+            background-color: #0056b3;
+        }
+        #goBtn:disabled, #agentPromptBtn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /* Container for webviews */
+        .webview-container {
+            flex-grow: 1;
+            position: relative; /* Needed for absolute positioning of webviews */
+            background-color: #fff; /* Background when no webview is visible */
+            overflow: hidden; /* Prevent webviews from overflowing */
+        }
+
+        /* Individual webview styling */
+        webview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none; /* Hide by default, only active one will be flex */
+        }
+
+        webview.active {
+            display: flex; /* Or block, depending on your layout preference */
+        }
+    </style>
+</head>
+<body>
+    <div class="browser-header">
+        <div class="tab-bar" id="tabBar">
+            <button class="new-tab-button" id="newTabButton">+</button>
+            </div>
+        <div class="address-bar-container">
+            <button class="nav-button" id="backBtn">&#x25C0;</button> <button class="nav-button" id="forwardBtn">&#x25B6;</button> <button class="nav-button" id="refreshBtn">&#x21BB;</button> <input type="text" id="addressBar" placeholder="Type URL or agent command...">
+            <button id="goBtn">Go</button>
+            <button id="agentPromptBtn">Ask Agent</button>
+        </div>
+    </div>
+    <div class="webview-container" id="webviewContainer">
+        </div>
+    <div style="padding: 10px; text-align: center;" id="status">Ready.</div>
+
+    <script src="renderer.js"></script>
+</body>
+</html>
