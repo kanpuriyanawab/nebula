@@ -1,17 +1,12 @@
-// FILE: ./src/mastraAgent.js
-
 require('dotenv').config();
 const OpenAI = require('openai');
 
-// 1. Initialize the OpenAI client
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY, // Uses the key from your .env file
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 const MODEL = "gpt-4o";
 
-// 2. Define a library of detailed prompts for specific applications.
-// This allows for more reliable and feature-rich generation for common requests.
 const promptLibrary = {
     'tic-tac-toe': {
         keywords: ['tic tac toe', 'tic-tac-toe', 'noughts and crosses'],
@@ -65,11 +60,6 @@ const promptLibrary = {
     }
 };
 
-/**
- * Finds the best matching prompt from the library based on user input.
- * @param {string} userPrompt - The user's input command.
- * @returns {string|null} The detailed prompt for the matched application, or null if no match.
- */
 function getBestPrompt(userPrompt) {
     const lowerCasePrompt = userPrompt.toLowerCase();
     for (const key in promptLibrary) {
@@ -82,13 +72,11 @@ function getBestPrompt(userPrompt) {
         }
     }
     console.log("No specific application matched. Using generic prompt.");
-    return null; // Return null if no specific match is found
+    return null;
 }
 
 
-// 3. Define the main code generation function
 async function generateAppCode(userPrompt) {
-  // System prompt to set the context for the AI
   const systemPrompt = `
     You are an expert web developer specializing in creating single-file HTML applications.
     Your task is to generate complete, self-contained HTML files including all CSS
@@ -97,11 +85,8 @@ async function generateAppCode(userPrompt) {
     The output must ONLY be the raw HTML content, nothing else. Do not wrap the code in markdown backticks or add any explanations.
   `;
 
-  // Determine which prompt to use by checking our library first
   let finalUserPrompt = getBestPrompt(userPrompt);
 
-  // If no specific prompt was found in the library, create a generic one.
-  // This allows the agent to still attempt to build any other request.
   if (!finalUserPrompt) {
       finalUserPrompt = `
         Generate a complete, self-contained HTML file for the following user request: "${userPrompt}".
@@ -114,7 +99,6 @@ async function generateAppCode(userPrompt) {
   try {
     console.log(`Sending prompt to OpenAI model: ${MODEL}`);
     
-    // 4. Call the OpenAI API with the selected prompt
     const response = await openai.chat.completions.create({
       model: MODEL,
       messages: [
@@ -126,7 +110,6 @@ async function generateAppCode(userPrompt) {
 
     const generatedText = response.choices[0].message.content;
 
-    // 5. Clean and return the response
     const cleanedCode = generatedText.replace(/```html\n?|```/g, '').trim();
     return cleanedCode;
 
@@ -138,8 +121,9 @@ async function generateAppCode(userPrompt) {
             message: error.message,
         });
     }
-    throw error; // Re-throw the error to be caught by the main process
+    throw error;
   }
 }
 
 module.exports = { generateAppCode };
+

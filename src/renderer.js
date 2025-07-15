@@ -1,6 +1,4 @@
-// src/renderer.js
 document.addEventListener('DOMContentLoaded', () => {
-    // --- DOM Element References (always at the top) ---
     const tabBar = document.getElementById('tabBar');
     const newTabButton = document.getElementById('newTabButton');
     const addressBar = document.getElementById('addressBar');
@@ -12,13 +10,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const webviewContainer = document.getElementById('webviewContainer');
     const statusDiv = document.getElementById('status');
 
-    // --- Global/State Variables (always at the top) ---
     let activeTabId = null;
-    const tabs = new Map(); // Map: tabId -> { tabElement: HTMLElement, webviewElement: HTMLWebViewElement }
+    const tabs = new Map(); 
     let nextTabId = 1;
-    let currentOmnibarMode = 'url'; // 'url', 'search', 'agent'
+    let currentOmnibarMode = 'url'; 
 
-    // --- Helper Functions (Declare all of them before they are called) ---
 
     const updateOmnibarUI = (mode) => {
         currentOmnibarMode = mode;
@@ -28,7 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (mode === 'agent') {
             addressBar.placeholder = 'Ask the agent... (e.g., create tic tac toe app)';
             goBtn.textContent = 'Ask Agent';
-        } else { // 'url' mode
+        } else { 
             addressBar.placeholder = 'Type URL or agent/search command...';
             goBtn.textContent = 'Go';
         }
@@ -56,11 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await window.electronAPI.generateApp(command);
 
             if (result.success) {
-                // Create a new tab and load the generated HTML as a data URL
                 const { tabId, webviewElement } = createNewTab('about:blank', true); // Create a blank tab first
 
-                // Wait for the webview to be ready before loading the data URL
-                // This 'dom-ready' listener ensures webview methods are callable.
                 webviewElement.addEventListener('dom-ready', () => {
                     const encodedHtml = encodeURIComponent(result.html);
                     const dataUrl = `data:text/html;charset=utf-8,${encodedHtml}`;
@@ -160,23 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
             newTab.webviewElement.classList.add('active');
             activeTabId = tabId;
 
-            // --- IMPORTANT CHANGE HERE ---
-            // When activating a tab, we primarily change its visibility.
-            // The address bar and navigation button states should be updated
-            // reliably by the webview's 'dom-ready'/'did-finish-load' events
-            // whenever the content changes or *becomes* active.
-            // For already loaded tabs, manually trigger an update if necessary.
-            // Avoid calling webview methods directly here during initial activation
-            // to prevent the "not attached to DOM" error.
-
-            // Set placeholder for a moment until webview reports its actual URL
             addressBar.value = 'Loading...';
-            updateNavigationButtons(null); // Disable buttons until active webview is fully ready
-            updateOmnibarUI('url'); // Reset omnibar mode when activating a tab
-
-            // If the webview is already loaded, ensure its URL/title/nav state is reflected
-            // This is safer to do after a very short delay or by re-triggering its load events.
-            // For now, relying solely on 'dom-ready' and 'did-finish-load' from the webview itself.
+            updateNavigationButtons(null); 
+            updateOmnibarUI('url');
 
             console.log(`Activated new tab: ${tabId}`);
         } else {
@@ -208,12 +187,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tabs.set(tabId, { tabElement, webviewElement });
 
-        // --- Webview Event Listeners ---
-        // These listeners are now the SOLE source of truth for updating address bar,
-        // tab title, and navigation buttons, ensuring webview is ready.
         webviewElement.addEventListener('dom-ready', () => {
             console.log(`Webview ${tabId} DOM is ready. Updating UI.`);
-            if (tabId === activeTabId) { // Only update if this is the currently active tab
+            if (tabId === activeTabId) { 
                 addressBar.value = webviewElement.getURL();
                 updateNavigationButtons(webviewElement);
             }
@@ -224,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const currentUrl = webviewElement.getURL();
             const currentTitle = webviewElement.getTitle();
             console.log(`Webview ${tabId} finished loading: ${currentUrl}. Updating UI.`);
-            if (tabId === activeTabId) { // Only update if this is the currently active tab
+            if (tabId === activeTabId) { 
                 addressBar.value = currentUrl;
                 updateNavigationButtons(webviewElement);
             }
@@ -233,13 +209,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         webviewElement.addEventListener('did-navigate', (event) => {
             console.log(`Webview ${tabId} navigated to: ${event.url}. Updating UI.`);
-            if (tabId === activeTabId) { // Only update if this is the currently active tab
+            if (tabId === activeTabId) {
                 addressBar.value = event.url;
                 updateNavigationButtons(webviewElement);
             }
             tabElement.querySelector('span:first-child').textContent = webviewElement.getTitle() || (event.url.split('/')[2] || 'Loading...');
         });
-        // ... (rest of webview event listeners like click, close) ...
 
         tabElement.addEventListener('click', (e) => {
             if (!e.target.classList.contains('tab-close')) {
@@ -252,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             closeTab(tabId);
         });
 
-        activateTab(tabId); // Activate the newly created tab immediately
+        activateTab(tabId); 
         return { tabId, webviewElement };
     };
 
@@ -279,9 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
 
-    // --- Event Listeners (after all functions are declared) ---
-
-    // Listen for input changes in the address bar
     addressBar.addEventListener('input', () => {
         const value = addressBar.value.trim();
         if (value.startsWith('/search')) {
@@ -321,8 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
         createNewTab('about:blank');
     });
 
-    // --- Initial Setup (always at the very end) ---
     console.log("Initializing first tab...");
-    updateOmnibarUI('url'); // Set initial UI state
-    createNewTab('https://www.google.com'); // Create the first tab on launch
+    updateOmnibarUI('url'); 
+    createNewTab('https://www.google.com');
 });
