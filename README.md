@@ -1,4 +1,4 @@
-# Agentic Browser++
+# Nebula : An open-source agentic browser
 
 A modern, open source, agentic browser built with Electron from scratch.  
 It combines classic tabbed browsing with an AI agent that can generate fully functional web apps (like games, tools, and dashboards) on demand, directly in a new tab.
